@@ -1,0 +1,1 @@
+{"errors":[{"message":"Field 'reviews' doesn't exist on type 'Post' (Did you mean `reviewsCount`?)","locations":[{"line":1,"column":35}],"path":["query","post","reviews"],"extensions":{"code":"undefinedField","typeName":"Post","fieldName":"reviews"}}]}
