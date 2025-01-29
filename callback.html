@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth Redirect</title>
+</head>
+<body>
+    <h2>Processing OAuth Redirect...</h2>
+    <script>
+        // Get the authorization "code" from the URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const authCode = params.get("code");
+
+        if (authCode) {
+            document.body.innerHTML = `<h2>Authorization successful!</h2><p>Code: ${authCode}</p>`;
+            
+            // Store or send the code to GitHub Actions if needed
+            console.log("Authorization Code:", authCode);
+        } else {
+            document.body.innerHTML = "<h2>No authorization code found.</h2>";
+        }
+    </script>
+</body>
+</html>
