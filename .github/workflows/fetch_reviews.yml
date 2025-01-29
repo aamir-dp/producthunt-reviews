@@ -1,0 +1,31 @@
+name: Fetch Product Hunt Reviews
+
+on:
+  schedule:
+    - cron: "0 12 * * *"  # Runs daily at 12 PM UTC
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  fetch_reviews:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Fetch reviews from Product Hunt
+        run: |
+          curl -X POST "https://api.producthunt.com/v2/api/graphql" \
+            -H "Authorization: Bearer ${{ secrets.PRODUCT_HUNT_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "query": "{ post(id: \"your_post_id\") { name reviews(first: 10) { edges { node { id body rating createdAt user { name } } } } } }"
+            }' > reviews.json
+
+      - name: Commit and push reviews
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add reviews.json
+          git commit -m "Updated Product Hunt reviews"
+          git push
