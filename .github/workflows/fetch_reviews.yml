@@ -13,6 +13,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Debug Token
+        run: |
+          echo "Checking if token is available..."
+          if [[ -z "${{ secrets.PRODUCT_HUNT_TOKEN }}" ]]; then
+            echo "❌ ERROR: PRODUCT_HUNT_TOKEN is missing!"
+            exit 1
+          else
+            echo "✅ Token exists!"
+          fi
+
       - name: Fetch reviews from Product Hunt
         run: |
           curl -X POST "https://api.producthunt.com/v2/api/graphql" \
@@ -20,12 +30,15 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "query": "{ post(id: \"your_post_id\") { name reviews(first: 10) { edges { node { id body rating createdAt user { name } } } } } }"
-            }' > reviews.json
+            }' > reviews.json || (echo "❌ API Request Failed!" && cat reviews.json && exit 1)
 
       - name: Commit and push reviews
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Use the Personal Access Token
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
           git add reviews.json
-          git commit -m "Updated Product Hunt reviews"
-          git push
+          git commit -m "Updated Product Hunt reviews" || echo "⚠️ No changes to commit."
+          git push origin main
